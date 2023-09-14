@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Booking {
+  booking_id                  Int           @id @default(autoincrement())
+  train                       Train         @relation(fields: [train_id], references: [id])
+  train_id                    Int
+  user                        User          @relation(fields: [user_id], references: [user_id])
+  user_id                     String
+  no_of_seats                 Int
+  seatBookings                SeatBooking[]
+  arrival_time_at_source      DateTime
+  arrival_time_at_destination DateTime
+
+  // You can add any other fields related to bookings here
+}
+
+model Train {
+  id                          Int           @id @default(autoincrement())
+  train_name                  String
+  source                      String
+  destination                 String
+  seat_capacity               Int
+  arrival_time_at_source      DateTime
+  arrival_time_at_destination DateTime
+  bookings                    Booking[] // Define the opposite relation here
+  seatBookings                SeatBooking[]
+}
+
+model SeatBooking {
+  id         Int     @id @default(autoincrement())
+  train      Train   @relation(fields: [train_id], references: [id])
+  train_id   Int
+  seatNumber Int
+  booked     Boolean
+  booking    Booking @relation(fields: [booking_id], references: [booking_id])
+  booking_id Int
+
+  @@unique([train_id, seatNumber])
+}
+
+model User {
+  user_id   String    @id @unique
+  user_name String
+  email_id  String    @unique
+  password  String
+  bookings  Booking[] // Define the opposite relation here
+  role      String
+}
